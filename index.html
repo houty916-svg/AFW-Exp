@@ -138,7 +138,7 @@ const start=$("start"), task=$("task"), brk=$("break"), end=$("end");
 
 function showTrial(){
   const fn=order[idx];
-  $("stim").src="images/"+encodeURIComponent(fn);
+  $("stim").src="Fear_images/"+encodeURIComponent(fn);
   $("count").textContent=`${idx+1} / ${order.length}`;
   $("bar").style.width=`${(idx/order.length)*100}%`;
   $("slider").value=50; $("val").textContent="—";
