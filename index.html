@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>恐惧图片材料评定</title>
+<style>
+:root{
+  --bg:#f5f7fa; --card:#ffffff; --text:#1f2937; --muted:#6b7280;
+  --line:#d1d5db; --accent:#111827;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",
+  "Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+  background:var(--bg); color:var(--text);
+}
+.wrap{max-width:980px;margin:0 auto;padding:28px 22px 42px}
+.card{
+  background:var(--card); border:1px solid #e5e7eb; border-radius:16px;
+  box-shadow:0 8px 24px rgba(0,0,0,.05); padding:28px;
+}
+h1{margin:0 0 10px;font-size:28px}
+p{line-height:1.7}
+.muted{color:var(--muted)}
+.row{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+input[type=text]{
+  width:280px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:16px
+}
+button{
+  appearance:none;border:none;border-radius:10px;background:var(--accent);color:white;
+  padding:12px 18px;font-size:16px;cursor:pointer
+}
+button:disabled{opacity:.35;cursor:not-allowed}
+.hidden{display:none!important}
+.topbar{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:14px}
+.progress{height:8px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-bottom:22px}
+.progress>div{height:100%;background:#111827;width:0%}
+.imagebox{
+  display:flex;justify-content:center;align-items:center;min-height:420px;
+  background:#111;border-radius:12px;overflow:hidden;margin:0 auto 26px;
+}
+.imagebox img{max-width:100%;max-height:62vh;display:block;object-fit:contain}
+.question{font-size:24px;font-weight:650;text-align:center;margin:8px 0 22px}
+.scale-area{max-width:760px;margin:0 auto}
+.value{
+  text-align:center;font-size:34px;font-variant-numeric:tabular-nums;
+  margin:0 0 12px;font-weight:700
+}
+input[type=range]{width:100%;height:34px;cursor:pointer}
+.labels{display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin-top:2px}
+.actions{display:flex;justify-content:center;margin-top:24px}
+.breakbox{text-align:center;padding:42px 12px}
+.small{font-size:14px}
+.kbd{
+  display:inline-block;border:1px solid #d1d5db;border-bottom-width:2px;border-radius:6px;
+  padding:1px 6px;background:#fff;font-size:12px;color:#4b5563
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="start" class="card">
+    <h1>恐惧图片材料评定</h1>
+    <p>接下来你将依次看到若干张图片。请根据看到图片后的<strong>即时主观感受</strong>进行评分。</p>
+    <p><strong>问题：</strong>你感觉有多恐惧？</p>
+    <p class="muted">评分范围为 0–100：0 = 完全不恐惧，100 = 极度恐惧。没有正确答案，请按第一感受作答。</p>
+    <p class="muted small">图片顺序会自动随机。全部图片分为两段，中间会出现一次休息提示。</p>
+    <div class="row" style="margin-top:22px">
+      <input id="sid" type="text" placeholder="请输入被试编号" autocomplete="off"/>
+      <button id="startBtn">开始评定</button>
+    </div>
+  </section>
+
+  <section id="task" class="card hidden">
+    <div class="topbar">
+      <div id="count">1 / 119</div>
+      <div class="muted small">拖动滑块评分</div>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="imagebox"><img id="stim" alt="实验图片"/></div>
+    <div class="question">你感觉有多恐惧？</div>
+    <div class="scale-area">
+      <div id="val" class="value">—</div>
+      <input id="slider" type="range" min="0" max="100" step="1" value="50"/>
+      <div class="labels"><span>0｜完全不恐惧</span><span>100｜极度恐惧</span></div>
+    </div>
+    <div class="actions"><button id="nextBtn" disabled>下一张</button></div>
+  </section>
+
+  <section id="break" class="card hidden">
+    <div class="breakbox">
+      <h1>休息一下</h1>
+      <p>你已经完成大约一半。准备好后继续。</p>
+      <button id="continueBtn">继续</button>
+    </div>
+  </section>
+
+  <section id="end" class="card hidden">
+    <h1>评定完成</h1>
+    <p>谢谢参与。数据将自动下载为 CSV 文件。</p>
+    <button id="downloadAgain">再次下载数据</button>
+  </section>
+</div>
+
+<script>
+const FILES = ["1019.jpg", "1022.jpg", "1026.jpg", "1030.jpg", "1040.jpg", "1050.jpg", "1051.jpg", "1052.jpg", "1070.jpg", "1080.jpg", "1090.jpg", "1101.jpg", "1110.jpg", "1111.jpg", "1113.jpg", "1114.jpg", "1120.jpg", "1121.jpg", "1200.jpg", "1201.jpg", "1205.jpg", "1220.jpg", "1230.jpg", "1240.jpg", "1270.jpg", "1274.jpg", "1275.jpg", "1280.jpg", "1300.jpg", "1301.jpg", "1302.jpg", "1321.jpg", "1525.jpg", "1930.jpg", "1931.jpg", "1932.jpg", "2053.jpg", "2095.jpg", "2100.jpg", "2120.jpg", "2130.jpg", "2141.jpg", "2220.jpg", "2221.jpg", "2278.jpg", "2352.2.jpg", "2352.jpg", "2491.jpg", "2635.jpg", "2655.jpg", "2660.jpg", "2661.jpg", "2681.jpg", "2682.jpg", "2683.jpg", "2691.jpg", "2692.jpg", "2694.jpg", "2695.jpg", "2703.jpg", "2704.jpg", "2717.jpg", "2751.jpg", "2780.jpg", "2800.jpg", "2811.jpg", "3181.jpg", "3210.jpg", "3225.jpg", "3266.jpg", "3280.jpg", "3500.jpg", "3530.jpg", "3550.jpg", "5920.jpg", "5940.jpg", "5950.jpg", "5972.jpg", "6242.jpg", "6243.jpg", "6300.jpg", "6311.jpg", "6312.jpg", "6313.jpg", "6315.jpg", "6415.jpg", "6540.jpg", "6571.jpg", "6821.jpg", "6836.jpg", "6838.jpg", "6840.jpg", "6900.jpg", "6940.jpg", "7054.jpg", "7361.jpg", "7380.jpg", "7640.jpg", "8160.jpg", "8179.jpg", "9050.jpg", "9102.jpg", "9250.jpg", "9270.jpg", "9280.jpg", "9402.jpg", "9419.jpg", "9423.jpg", "9424.jpg", "9427.jpg", "9428.jpg", "9429.jpg", "9440.jpg", "9594.jpg", "9600.jpg", "9810.jpg", "9901.jpg", "9910.jpg", "9926.jpg"];
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function escCsv(v){
+  const s=String(v ?? "");
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
+function downloadCsv(rows, subject){
+  const headers=["subject_id","trial_order","image","fear_rating_0_100","rt_ms","timestamp"];
+  const lines=[headers.join(",")].concat(rows.map(r=>headers.map(h=>escCsv(r[h])).join(",")));
+  const blob=new Blob(["\uFEFF"+lines.join("\n")],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  const ts=new Date().toISOString().replace(/[:.]/g,"-");
+  a.href=url;
+  a.download=`FearRatings_${subject}_${ts}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+
+let subject="", order=[], idx=0, rows=[], t0=0, touched=false, broke=false;
+const $=id=>document.getElementById(id);
+const start=$("start"), task=$("task"), brk=$("break"), end=$("end");
+
+function showTrial(){
+  const fn=order[idx];
+  $("stim").src="images/"+encodeURIComponent(fn);
+  $("count").textContent=`${idx+1} / ${order.length}`;
+  $("bar").style.width=`${(idx/order.length)*100}%`;
+  $("slider").value=50; $("val").textContent="—";
+  $("nextBtn").disabled=true; touched=false;
+  t0=performance.now();
+}
+$("startBtn").onclick=()=>{
+  subject=$("sid").value.trim();
+  if(!subject){ alert("请先输入被试编号。"); return; }
+  order=shuffle(FILES);
+  start.classList.add("hidden"); task.classList.remove("hidden");
+  showTrial();
+};
+$("slider").addEventListener("input",()=>{
+  touched=true; $("val").textContent=$("slider").value;
+  $("nextBtn").disabled=false;
+});
+$("nextBtn").onclick=()=>{
+  if(!touched) return;
+  const rt=Math.round(performance.now()-t0);
+  rows.push({
+    subject_id:subject,
+    trial_order:idx+1,
+    image:order[idx],
+    fear_rating_0_100:Number($("slider").value),
+    rt_ms:rt,
+    timestamp:new Date().toISOString()
+  });
+  idx++;
+  const half=Math.floor(order.length/2);
+  if(!broke && idx===half){
+    broke=true; task.classList.add("hidden"); brk.classList.remove("hidden"); return;
+  }
+  if(idx>=order.length){
+    $("bar").style.width="100%";
+    task.classList.add("hidden"); end.classList.remove("hidden");
+    downloadCsv(rows,subject); return;
+  }
+  showTrial();
+};
+$("continueBtn").onclick=()=>{
+  brk.classList.add("hidden"); task.classList.remove("hidden"); showTrial();
+};
+$("downloadAgain").onclick=()=>downloadCsv(rows,subject);
+</script>
+</body>
+</html>
