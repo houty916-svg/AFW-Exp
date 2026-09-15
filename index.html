@@ -15,7 +15,7 @@ input[type=text]{width:280px;padding:12px 14px;border:1px solid var(--line);bord
 .imagebox{display:flex;justify-content:center;align-items:center;min-height:420px;background:#111;border-radius:12px;overflow:hidden;margin:0 auto 26px}.imagebox img{max-width:100%;max-height:62vh;display:block;object-fit:contain}.question{font-size:24px;font-weight:650;text-align:center;margin:8px 0 18px}
 .rating-wrap{max-width:760px;margin:0 auto}
 .scale-note{display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin:8px 2px 14px}
-.keypad{display:grid;grid-template-columns:repeat(9,1fr);gap:8px;margin-top:8px}
+.keypad{display:grid;grid-template-columns:repeat(10,1fr);gap:8px;margin-top:8px}
 .key{background:#f3f4f6;color:#111827;border:1px solid #d1d5db;padding:14px 4px;font-size:22px;font-weight:650;border-radius:12px}
 .key:active{transform:translateY(1px);background:#e5e7eb}
 .key.selected{background:#111827;color:#fff;border-color:#111827}
@@ -29,8 +29,8 @@ input[type=text]{width:280px;padding:12px 14px;border:1px solid var(--line);bord
 <h1>恐惧图片材料评定</h1>
 <p>接下来你将依次看到若干张图片。请根据看到图片后的<strong>即时主观感受</strong>进行评分。</p>
 <p><strong>问题：</strong>你感觉有多恐惧？</p>
-<p class="muted">请使用 1–9 级评分：1 = 完全不恐惧，9 = 极度恐惧。没有正确答案，请按第一感受作答。</p>
-<p class="muted small">看到图片后，请直接点击 1–9 中最符合你此刻感受的数字。电脑端也可以直接按键盘 1–9 选择，按 Enter 进入下一张。</p>
+<p class="muted">请使用 0–9 级评分：0 = 完全不恐惧，9 = 极度恐惧。没有正确答案，请按第一感受作答。</p>
+<p class="muted small">看到图片后，请直接点击 0–9 中最符合你此刻感受的数字。电脑端也可以直接按键盘 0–9 选择，按 Enter 进入下一张。</p>
 <div class="row" style="margin-top:22px"><input id="sid" type="text" placeholder="请输入被试编号" autocomplete="off"/><button id="startBtn">开始 / 继续评定</button></div>
 <div id="startStatus" class="status">正在读取当前材料列表……</div>
 </section>
@@ -41,8 +41,9 @@ input[type=text]{width:280px;padding:12px 14px;border:1px solid var(--line);bord
 <div class="imagebox"><img id="stim" alt="实验图片"/></div>
 <div class="question">你感觉有多恐惧？</div>
 <div class="rating-wrap">
-<div class="scale-note"><span>1｜完全不恐惧</span><span>5｜中等程度</span><span>9｜极度恐惧</span></div>
-<div class="keypad" role="radiogroup" aria-label="恐惧程度，1到9">
+<div class="scale-note"><span>0｜完全不恐惧</span><span>9｜极度恐惧</span></div>
+<div class="keypad" role="radiogroup" aria-label="恐惧程度，0到9">
+<button class="key" type="button" data-rating="0" role="radio" aria-checked="false">0</button>
 <button class="key" type="button" data-rating="1" role="radio" aria-checked="false">1</button>
 <button class="key" type="button" data-rating="2" role="radio" aria-checked="false">2</button>
 <button class="key" type="button" data-rating="3" role="radio" aria-checked="false">3</button>
@@ -54,7 +55,7 @@ input[type=text]{width:280px;padding:12px 14px;border:1px solid var(--line);bord
 <button class="key" type="button" data-rating="9" role="radio" aria-checked="false">9</button>
 </div>
 <div class="actions"><button id="nextBtn" type="button" disabled>下一张</button></div>
-<div id="ratingHint" class="muted small" style="text-align:center;margin-top:10px">请选择 1–9 中的一个数字。</div>
+<div id="ratingHint" class="muted small" style="text-align:center;margin-top:10px">请选择 0–9 中的一个数字。</div>
 </div>
 </section>
 
@@ -67,7 +68,7 @@ const $=id=>document.getElementById(id),start=$("start"),task=$("task"),brk=$("b
 function setStatus(el,text,type=""){el.textContent=text;el.className="status"+(type?" "+type:"")}
 function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 let selectedRating=null;
-function validRating(){return Number.isInteger(selectedRating)&&selectedRating>=1&&selectedRating<=9}
+function validRating(){return Number.isInteger(selectedRating)&&selectedRating>=0&&selectedRating<=9}
 function renderRating(){
   document.querySelectorAll(".key").forEach(btn=>{
     const selected=Number(btn.dataset.rating)===selectedRating;
@@ -76,18 +77,32 @@ function renderRating(){
   });
   const ok=validRating();
   $("nextBtn").disabled=!ok;
-  $("ratingHint").textContent=ok?`已选择：${selectedRating}`:"请选择 1–9 中的一个数字。";
+  $("ratingHint").textContent=ok?`已选择：${selectedRating}`:"请选择 0–9 中的一个数字。";
 }
 function chooseRating(value){
   const n=Number(value);
-  if(!Number.isInteger(n)||n<1||n>9)return;
+  if(!Number.isInteger(n)||n<0||n>9)return;
   selectedRating=n;
   renderRating();
 }
 function clearRating(){selectedRating=null;renderRating()}
 function saveLocalState(){if(!subject||!sessionId)return;localStorage.setItem("fear_rating_state_"+subject,JSON.stringify({subject,sessionId,order,idx,completed:[...completedSet],broke}))}
 function loadLocalState(subjectId){try{const raw=localStorage.getItem("fear_rating_state_"+subjectId);return raw?JSON.parse(raw):null}catch(e){return null}}
-async function loadStimuli(){const res=await fetch("stimuli.json?ts="+Date.now(),{cache:"no-store"});if(!res.ok)throw new Error("无法读取 stimuli.json");const data=await res.json();if(!Array.isArray(data)||data.length===0)throw new Error("材料列表为空");FILES=data}
+async function loadStimuli(){
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),15000);
+  try{
+    const res=await fetch("stimuli.json?ts="+Date.now(),{cache:"no-store",signal:controller.signal});
+    if(!res.ok)throw new Error(`无法读取 stimuli.json（HTTP ${res.status}）`);
+    const data=await res.json();
+    if(!Array.isArray(data)||data.length===0||data.some(name=>typeof name!=="string"||!name.trim()))throw new Error("材料列表为空或格式不正确");
+    FILES=data;
+  }catch(e){
+    if(e.name==="AbortError")throw new Error("读取材料列表超时，请检查网络后刷新页面");
+    if(e instanceof SyntaxError)throw new Error("stimuli.json 不是有效的 JSON，请确认部署时已生成材料列表");
+    throw e;
+  }finally{clearTimeout(timeout)}
+}
 async function getServerSession(subjectId){const res=await fetch("/api/session?subject_id="+encodeURIComponent(subjectId),{cache:"no-store"});if(!res.ok)throw new Error("无法读取服务器进度");return await res.json()}
 async function createServerSession(subjectId,newOrder){const res=await fetch("/api/session",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({subject_id:subjectId,order:newOrder})});if(!res.ok)throw new Error("无法创建服务器会话");return await res.json()}
 async function submitResponse(payload){const res=await fetch("/api/response",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});if(!res.ok)throw new Error("服务器保存失败");return await res.json()}
@@ -104,7 +119,7 @@ document.querySelectorAll(".key").forEach(btn=>{
 });
 document.addEventListener("keydown",e=>{
   if(task.classList.contains("hidden"))return;
-  if(/^[1-9]$/.test(e.key)){
+  if(/^[0-9]$/.test(e.key)){
     e.preventDefault();
     chooseRating(Number(e.key));
   }else if(e.key==="Enter"&&validRating()){
@@ -115,6 +130,7 @@ document.addEventListener("keydown",e=>{
 $("nextBtn").onclick=submitCurrent;
 $("startBtn").onclick=startOrResume;
 $("continueBtn").onclick=()=>{brk.classList.add("hidden");task.classList.remove("hidden");showTrial()};
-window.addEventListener("load",async()=>{try{await loadStimuli();setStatus($("startStatus"),`已读取 ${FILES.length} 张图片。`,"ok")}catch(e){setStatus($("startStatus"),"材料列表读取失败。请确认 Cloudflare 构建时已生成 stimuli.json。","err")}});
+async function initializeStimuli(){try{await loadStimuli();setStatus($("startStatus"),`已读取 ${FILES.length} 张图片。`,"ok")}catch(e){setStatus($("startStatus"),"材料列表读取失败："+e.message,"err")}}
+initializeStimuli();
 </script>
 </body></html>
