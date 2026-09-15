@@ -13,14 +13,10 @@ input[type=text]{width:280px;padding:12px 14px;border:1px solid var(--line);bord
 .status{margin:14px 0 0;padding:10px 12px;border-radius:10px;font-size:14px;background:#f3f4f6;color:#4b5563}.status.ok{background:#ecfdf5;color:var(--ok)}.status.err{background:#fef2f2;color:var(--danger)}
 .topbar{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:14px}.progress{height:8px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-bottom:22px}.progress>div{height:100%;background:#111827;width:0%}
 .imagebox{display:flex;justify-content:center;align-items:center;min-height:420px;background:#111;border-radius:12px;overflow:hidden;margin:0 auto 26px}.imagebox img{max-width:100%;max-height:62vh;display:block;object-fit:contain}.question{font-size:24px;font-weight:650;text-align:center;margin:8px 0 18px}
-.rating-wrap{max-width:760px;margin:0 auto}
-.scale-note{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:14px;margin:8px 2px 16px}
-.keypad{display:grid;grid-template-columns:repeat(9,1fr);gap:8px;margin-top:8px}
-.key{background:#f3f4f6;color:#111827;border:1px solid #d1d5db;padding:15px 4px;font-size:22px;font-weight:650;border-radius:12px}
-.key:active{transform:translateY(1px);background:#e5e7eb}
-.key.selected{background:#111827;color:#fff;border-color:#111827}
+.rating-wrap{max-width:560px;margin:0 auto}.rating-display,.rating-input{width:100%;height:68px;border:2px solid #d1d5db;border-radius:14px;font-size:34px;font-weight:700;text-align:center;outline:none;font-variant-numeric:tabular-nums;background:#fff}.rating-display{display:flex;align-items:center;justify-content:center;color:#9ca3af;cursor:text;user-select:none;-webkit-user-select:none}.rating-display.has-value{color:#111827}.rating-input:focus{border-color:#111827}
+.scale-note{display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin:8px 2px 14px}.keypad{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:8px}.key{background:#f3f4f6;color:#111827;border:1px solid #d1d5db;padding:14px 4px;font-size:22px;font-weight:650;border-radius:12px}.key:active{transform:translateY(1px);background:#e5e7eb}
 .actions{display:flex;justify-content:center;margin-top:22px;gap:12px}.breakbox,.endbox{text-align:center;padding:30px 12px}
-@media(max-width:600px){.wrap{padding:12px 10px 28px}.card{padding:18px;border-radius:12px}h1{font-size:23px}.imagebox{min-height:300px;margin-bottom:20px}.imagebox img{max-height:52vh}.question{font-size:21px}.keypad{gap:5px}.key{padding:12px 0;font-size:18px}}
+@media(max-width:600px){.wrap{padding:12px 10px 28px}.card{padding:18px;border-radius:12px}h1{font-size:23px}.imagebox{min-height:300px;margin-bottom:20px}.imagebox img{max-height:52vh}.question{font-size:21px}.key{padding:12px 2px;font-size:20px}.rating-display,.rating-input{height:62px;font-size:31px}}
 </style>
 </head>
 <body>
@@ -29,8 +25,8 @@ input[type=text]{width:280px;padding:12px 14px;border:1px solid var(--line);bord
 <h1>恐惧图片材料评定</h1>
 <p>接下来你将依次看到若干张图片。请根据看到图片后的<strong>即时主观感受</strong>进行评分。</p>
 <p><strong>问题：</strong>你感觉有多恐惧？</p>
-<p class="muted">请使用 1–9 级评分：1 = 完全不恐惧，9 = 极度恐惧。没有正确答案，请按第一感受作答。</p>
-<p class="muted small">看到图片后，请直接点击 1–9 中最符合你此刻感受的数字。电脑端也可以直接按键盘 1–9 选择。</p>
+<p class="muted">评分范围为 0–100：0 = 完全不恐惧，100 = 极度恐惧。没有正确答案，请按第一感受作答。</p>
+<p class="muted small">可点击 0–9 数字键，也可直接使用手机/电脑键盘输入。按 Enter 可进入下一张。</p>
 <div class="row" style="margin-top:22px"><input id="sid" type="text" placeholder="请输入被试编号" autocomplete="off"/><button id="startBtn">开始 / 继续评定</button></div>
 <div id="startStatus" class="status">正在读取当前材料列表……</div>
 </section>
@@ -41,24 +37,15 @@ input[type=text]{width:280px;padding:12px 14px;border:1px solid var(--line);bord
 <div class="imagebox"><img id="stim" alt="实验图片"/></div>
 <div class="question">你感觉有多恐惧？</div>
 <div class="rating-wrap">
-<div class="scale-note">
-  <span>1｜完全不恐惧</span>
-  <span>5｜中等程度</span>
-  <span>9｜极度恐惧</span>
+<div id="ratingDisplay" class="rating-display" role="button" aria-label="当前恐惧评分；点击可手动输入">0–100</div>
+<input id="manualRating" class="rating-input hidden" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="0–100" autocomplete="off" aria-label="手动输入恐惧评分，0到100"/>
+<div class="scale-note"><span>0｜完全不恐惧</span><span>100｜极度恐惧</span></div>
+<div class="keypad">
+<button class="key" data-digit="1">1</button><button class="key" data-digit="2">2</button><button class="key" data-digit="3">3</button><button class="key" data-digit="4">4</button><button class="key" data-digit="5">5</button>
+<button class="key" data-digit="6">6</button><button class="key" data-digit="7">7</button><button class="key" data-digit="8">8</button><button class="key" data-digit="9">9</button><button class="key" data-digit="0">0</button>
 </div>
-<div class="keypad" role="radiogroup" aria-label="恐惧程度，1到9">
-  <button class="key" type="button" data-rating="1" role="radio" aria-checked="false">1</button>
-  <button class="key" type="button" data-rating="2" role="radio" aria-checked="false">2</button>
-  <button class="key" type="button" data-rating="3" role="radio" aria-checked="false">3</button>
-  <button class="key" type="button" data-rating="4" role="radio" aria-checked="false">4</button>
-  <button class="key" type="button" data-rating="5" role="radio" aria-checked="false">5</button>
-  <button class="key" type="button" data-rating="6" role="radio" aria-checked="false">6</button>
-  <button class="key" type="button" data-rating="7" role="radio" aria-checked="false">7</button>
-  <button class="key" type="button" data-rating="8" role="radio" aria-checked="false">8</button>
-  <button class="key" type="button" data-rating="9" role="radio" aria-checked="false">9</button>
-</div>
-<div class="actions"><button id="nextBtn" type="button" disabled>下一张</button></div>
-<div id="ratingHint" class="muted small" style="text-align:center;margin-top:10px">请选择 1–9 中的一个数字。</div>
+<div class="actions"><button id="clearBtn" type="button" style="background:#6b7280">清除</button><button id="nextBtn" type="button" disabled>下一张</button></div>
+<div id="ratingHint" class="muted small" style="text-align:center;margin-top:10px">请输入 0–100 的整数。</div>
 </div>
 </section>
 
@@ -70,25 +57,13 @@ const IMAGE_DIR="Fear_images";let FILES=[];let subject="",sessionId="",order=[],
 const $=id=>document.getElementById(id),start=$("start"),task=$("task"),brk=$("break"),end=$("end");
 function setStatus(el,text,type=""){el.textContent=text;el.className="status"+(type?" "+type:"")}
 function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-let selectedRating=null;
-function validRating(){return Number.isInteger(selectedRating)&&selectedRating>=1&&selectedRating<=9}
-function renderRating(){
-  document.querySelectorAll(".key").forEach(btn=>{
-    const selected=Number(btn.dataset.rating)===selectedRating;
-    btn.classList.toggle("selected",selected);
-    btn.setAttribute("aria-checked",selected?"true":"false");
-  });
-  const ok=validRating();
-  $("nextBtn").disabled=!ok;
-  $("ratingHint").textContent=ok?`已选择：${selectedRating}`:"请选择 1–9 中的一个数字。";
-}
-function chooseRating(value){
-  const n=Number(value);
-  if(!Number.isInteger(n)||n<1||n>9)return;
-  selectedRating=n;
-  renderRating();
-}
-function clearRating(){selectedRating=null;renderRating()}
+let ratingText="";
+function validRating(){if(!/^\d{1,3}$/.test(ratingText))return false;const n=Number(ratingText);return Number.isInteger(n)&&n>=0&&n<=100}
+function renderRating(){const d=$("ratingDisplay"),m=$("manualRating");d.textContent=ratingText||"0–100";d.classList.toggle("has-value",!!ratingText);if(!m.classList.contains("hidden")&&m.value!==ratingText)m.value=ratingText;const ok=validRating();$("nextBtn").disabled=!ok;$("ratingHint").textContent=ok?'点击“下一张”提交；也可点击评分框调用系统键盘。':'请输入 0–100 的整数。'}
+function closeManualInput(){const m=$("manualRating");if(document.activeElement===m)m.blur();m.classList.add("hidden");$("ratingDisplay").classList.remove("hidden")}
+function openManualInput(){const m=$("manualRating");$("ratingDisplay").classList.add("hidden");m.classList.remove("hidden");m.value=ratingText;setTimeout(()=>{m.focus();const n=m.value.length;try{m.setSelectionRange(n,n)}catch(e){}},0)}
+function appendDigit(d){closeManualInput();if(ratingText.length>=3)return;const v=ratingText+d;if(Number(v)>100)return;ratingText=v;renderRating()}
+function clearRating(){closeManualInput();ratingText="";renderRating()}
 function saveLocalState(){if(!subject||!sessionId)return;localStorage.setItem("fear_rating_state_"+subject,JSON.stringify({subject,sessionId,order,idx,completed:[...completedSet],broke}))}
 function loadLocalState(subjectId){try{const raw=localStorage.getItem("fear_rating_state_"+subjectId);return raw?JSON.parse(raw):null}catch(e){return null}}
 async function loadStimuli(){const res=await fetch("stimuli.json?ts="+Date.now(),{cache:"no-store"});if(!res.ok)throw new Error("无法读取 stimuli.json");const data=await res.json();if(!Array.isArray(data)||data.length===0)throw new Error("材料列表为空");FILES=data}
@@ -97,20 +72,21 @@ async function createServerSession(subjectId,newOrder){const res=await fetch("/a
 async function submitResponse(payload){const res=await fetch("/api/response",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});if(!res.ok)throw new Error("服务器保存失败");return await res.json()}
 async function markComplete(){const res=await fetch("/api/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({session_id:sessionId})});if(!res.ok)throw new Error("完成状态保存失败")}
 function nextUnfinishedIndex(){for(let i=0;i<order.length;i++){if(!completedSet.has(i+1))return i}return order.length}
-function showTrial(){if(idx>=order.length){finishExperiment();return}const fn=order[idx];$("stim").src=IMAGE_DIR+"/"+encodeURIComponent(fn);$("stim").onerror=()=>{$("saveState").textContent="图片加载失败："+fn};$("count").textContent=`${idx+1} / ${order.length}`;$("bar").style.width=`${(idx/order.length)*100}%`;clearRating();$("saveState").textContent="等待评分";t0=performance.now()}
+function showTrial(){if(idx>=order.length){finishExperiment();return}const fn=order[idx];$("stim").src=IMAGE_DIR+"/"+encodeURIComponent(fn);$("stim").onerror=()=>{$("saveState").textContent="图片加载失败："+fn};$("count").textContent=`${idx+1} / ${order.length}`;$("bar").style.width=`${(idx/order.length)*100}%`;closeManualInput();ratingText="";renderRating();$("saveState").textContent="等待评分";t0=performance.now()}
 async function startOrResume(){subject=$("sid").value.trim();if(!subject){alert("请先输入被试编号。");return}if(FILES.length===0){alert("材料列表尚未加载完成，请稍后再试。");return}$("startBtn").disabled=true;setStatus($("startStatus"),"正在读取你的评定进度……");try{let remote=await getServerSession(subject);if(remote&&remote.found){sessionId=remote.session_id;order=remote.order;completedSet=new Set(remote.completed_trial_orders||[]);idx=nextUnfinishedIndex();broke=idx>=Math.floor(order.length/2);setStatus($("startStatus"),`检测到未完成记录，将从第 ${idx+1} 张继续。`,"ok")}else{order=shuffle(FILES);const created=await createServerSession(subject,order);sessionId=created.session_id;completedSet=new Set(created.completed_trial_orders||[]);broke=false;idx=nextUnfinishedIndex();setStatus($("startStatus"),"已创建新的评定记录。","ok")}}catch(err){const local=loadLocalState(subject);if(local&&Array.isArray(local.order)){sessionId=local.sessionId||("local-"+Date.now());order=local.order;completedSet=new Set(local.completed||[]);broke=!!local.broke;idx=nextUnfinishedIndex();setStatus($("startStatus"),"当前无法连接在线数据库，已从本机记录继续。","err")}else{sessionId="local-"+crypto.randomUUID();order=shuffle(FILES);completedSet=new Set();broke=false;idx=0;setStatus($("startStatus"),"当前无法连接在线数据库，将暂存在本机。","err")}}saveLocalState();start.classList.add("hidden");task.classList.remove("hidden");showTrial()}
-async function submitCurrent(){if(!validRating())return;$("nextBtn").disabled=true;$("saveState").textContent="正在保存……";const rating=selectedRating,rt=Math.round(performance.now()-t0),trialOrder=idx+1;const payload={session_id:sessionId,subject_id:subject,trial_order:trialOrder,image:order[idx],fear_rating_0_100:rating,rt_ms:rt,timestamp:new Date().toISOString(),total_trials:order.length};let savedOnline=false;try{if(!sessionId.startsWith("local-")){await submitResponse(payload);savedOnline=true}}catch(e){$("saveState").textContent="网络异常，尚未保存";$("nextBtn").disabled=false;alert("这一次评分还没有成功保存，请检查网络后再次点击“下一张”。");return}completedSet.add(trialOrder);idx++;saveLocalState();$("saveState").textContent=savedOnline?"已在线保存":"已暂存在本机";const half=Math.floor(order.length/2);if(!broke&&idx>=half&&idx<order.length){broke=true;saveLocalState();task.classList.add("hidden");brk.classList.remove("hidden");return}if(idx>=order.length){finishExperiment();return}showTrial()}
+async function submitCurrent(){if(!validRating())return;$("nextBtn").disabled=true;$("clearBtn").disabled=true;$("saveState").textContent="正在保存……";const rating=Number(ratingText),rt=Math.round(performance.now()-t0),trialOrder=idx+1;const payload={session_id:sessionId,subject_id:subject,trial_order:trialOrder,image:order[idx],fear_rating_0_100:rating,rt_ms:rt,timestamp:new Date().toISOString(),total_trials:order.length};let savedOnline=false;try{if(!sessionId.startsWith("local-")){await submitResponse(payload);savedOnline=true}}catch(e){$("saveState").textContent="网络异常，尚未保存";$("clearBtn").disabled=false;$("nextBtn").disabled=false;alert("这一次评分还没有成功保存，请检查网络后再次点击“下一张”。");return}completedSet.add(trialOrder);idx++;saveLocalState();$("saveState").textContent=savedOnline?"已在线保存":"已暂存在本机";$("clearBtn").disabled=false;const half=Math.floor(order.length/2);if(!broke&&idx>=half&&idx<order.length){broke=true;saveLocalState();task.classList.add("hidden");brk.classList.remove("hidden");return}if(idx>=order.length){finishExperiment();return}showTrial()}
 async function finishExperiment(){$("bar").style.width="100%";task.classList.add("hidden");brk.classList.add("hidden");end.classList.remove("hidden");let onlineOk=false;try{if(!sessionId.startsWith("local-")){await markComplete();onlineOk=true}}catch(e){}if(onlineOk){setStatus($("endStatus"),"数据已经保存到在线数据库，可以直接关闭页面。","ok");localStorage.removeItem("fear_rating_state_"+subject)}else{setStatus($("endStatus"),"当前网络保存状态不确定。请暂时不要清理浏览器数据，并联系研究者确认。","err")}}
 document.querySelectorAll(".key").forEach(btn=>{
   btn.addEventListener("pointerdown",e=>e.preventDefault());
-  btn.addEventListener("click",e=>{e.preventDefault();chooseRating(btn.dataset.rating)});
+  btn.addEventListener("mousedown",e=>e.preventDefault());
+  btn.addEventListener("click",e=>{e.preventDefault();appendDigit(btn.dataset.digit)});
 });
-document.addEventListener("keydown",e=>{
-  if(task.classList.contains("hidden"))return;
-  if(/^[1-9]$/.test(e.key)){e.preventDefault();chooseRating(Number(e.key))}
-  else if(e.key==="Enter"&&validRating()){e.preventDefault();submitCurrent()}
-});
-$("nextBtn").onclick=submitCurrent;
+$("ratingDisplay").addEventListener("click",openManualInput);
+$("manualRating").addEventListener("input",()=>{let v=$("manualRating").value.replace(/\D/g,"").slice(0,3);if(v&&Number(v)>100)v="100";ratingText=v;$("manualRating").value=v;renderRating()});
+$("manualRating").addEventListener("keydown",e=>{if(e.key==="Enter"&&validRating()){e.preventDefault();closeManualInput();submitCurrent()}});
+$("manualRating").addEventListener("blur",()=>{setTimeout(()=>{if(document.activeElement!==$("manualRating")){closeManualInput();renderRating()}},0)});
+$("clearBtn").onclick=clearRating;
+$("nextBtn").onclick=()=>{closeManualInput();submitCurrent()};
 $("startBtn").onclick=startOrResume;
 $("continueBtn").onclick=()=>{brk.classList.add("hidden");task.classList.remove("hidden");showTrial()};
 window.addEventListener("load",async()=>{try{await loadStimuli();setStatus($("startStatus"),`已读取 ${FILES.length} 张图片。`,"ok")}catch(e){setStatus($("startStatus"),"材料列表读取失败。请确认 Cloudflare 构建时已生成 stimuli.json。","err")}});
