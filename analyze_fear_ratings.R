@@ -10,7 +10,7 @@ input_file <- normalizePath(input_file, winslash = "/", mustWork = TRUE)
 out_dir <- file.path(dirname(input_file), "fear_analysis")
 dir.create(out_dir, showWarnings = FALSE)
 # 如要排除测试编号，在这里填写，例如 c("test", "001")。
-exclude_subjects <- character(0)
+exclude_subjects <- c("侯通业", "李萌萌")
 # 若研究设计并非125张，请按实际设计修改；不从当前缺失记录猜测总数。
 expected_images <- 125L
 
