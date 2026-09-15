@@ -2,7 +2,7 @@
 
 这个版本在你现有 index.html 基础上做了三项修改：
 
-1. 取消滑块，保留 0–100 分；页面显示 0–9 十个数字键，也可直接键盘输入，Enter 提交。
+1. 使用 0–9 分评分；页面显示 0–9 十个数字键，也可直接键盘选择，Enter 提交。
 2. 每张评分自动写入 Cloudflare D1；被试不再下载 CSV。输入相同被试编号可以跨浏览器/设备继续未完成进度。
 3. `generate-stimuli.js` 在每次部署时自动扫描 `Fear_images/` 并生成 `stimuli.json`，以后增删图片无需再改 index.html。
 
@@ -25,7 +25,9 @@ AFW-Exp/
 
 - Framework preset: None
 - Build command: `node generate-stimuli.js`
-- Build output directory: `.`
+- Build output directory: `dist`
+
+构建脚本仅将首页、材料列表和图片复制到 `dist`，避免将 `git.zip` 等备份上传到 Pages。`functions/` 保留在仓库根目录，由 Pages 单独编译。修改此设置后需重新部署。
 
 ## 一次性配置 D1
 
