@@ -81,3 +81,12 @@ AFW-Exp/
 运行 `node --test tests/regression.mjs`（需 Node.js 和 Python）。测试使用临时 SQLite 数据库及网页模拟环境，不连接线上数据库。
 涵盖无损重复迁移、旧会话缺项恢复、并发开始、重复评分幂等、人口学验证和导出、完成校验、连续提交、断网重试和图片加载门槛。
 线上 D1 的升级及实际部署仍需在 Cloudflare 完成。
+
+
+## 暂停与恢复参与
+
+先提交并部署 `functions/_middleware.js`。在 Cloudflare → afw-exp → Settings → Variables and Secrets → Production 添加文本变量 `MAINTENANCE`，值为 `1`，保存并重新部署。首页显示维护提示，评分/会话/完成接口返回503，已保存数据不变；`/api/export`仍由原ADMIN_KEY保护并可导出。
+
+恢复时将 `MAINTENANCE` 改为 `0`，保存并重新部署。未设置此变量时默认正常开放。此开关针对使用该配置的新部署，旧的历史部署地址不因此自动受保护；不要向被试分发历史部署地址。已打开的页面不会立即替换画面，但后续请求会被暂停；正在处理中的请求仍可能完成。
+
+暂停自动部署只会停止发布新版本，不能让当前网页停止接受参与。
