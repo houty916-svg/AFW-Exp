@@ -1,0 +1,15 @@
+Source: D:/我的/IER-组会/研究生选题/AFW-Exp/fear_ratings.csv
+Raw rows: 1896
+Analyzed rows: 1690
+Unique subject-image pairs: 1690
+Subjects: 14
+Images: 125
+Complete subjects: 11
+Repeated subject-image ratings: averaged before aggregation.
+Incomplete subjects: included in main analysis; complete-only results also exported.
+All means use observed scores only; missing scores are not replaced with zero.
+Same ID is assumed to identify the same person across sessions.
+With incomplete data, subjects may rate different image sets; compare cautiously.
+Shapiro-Wilk p>=0.05 does not establish normality; inspect Q-Q plots too.
+Normality tests are exploratory; means share participants/images.
+Do not delete outliers or transform ratings solely to pass a normality test.
